@@ -321,7 +321,7 @@ iunlockput(struct inode *ip)
 // The contents (data) associated with each inode is stored
 // in a sequence of blocks on the disk.  The first NDIRECT blocks
 // are listed in ip->addrs[].  The next NINDIRECT blocks are 
-// listed in the block ip->addrs[NDIRECT].
+// listed in the block ip->indirect_pntr.
 
 // Return the disk block address of the nth block in inode ip.
 // If there is no such block, bmap allocates one.
@@ -340,8 +340,8 @@ bmap(struct inode *ip, uint bn)
 
   if(bn < NINDIRECT){
     // Load indirect block, allocating if necessary.
-    if((addr = ip->addrs[NDIRECT]) == 0)
-      ip->addrs[NDIRECT] = addr = balloc(ip->dev);
+    if((addr = ip->indirect_pntr) == 0)
+      ip->indirect_pntr = addr = balloc(ip->dev);
     bp = bread(ip->dev, addr);
     a = (uint*)bp->data;
     if((addr = a[bn]) == 0){
@@ -372,16 +372,16 @@ itrunc(struct inode *ip)
     }
   }
   
-  if(ip->addrs[NDIRECT]){
-    bp = bread(ip->dev, ip->addrs[NDIRECT]);
+  if(ip->indirect_pntr){
+    bp = bread(ip->dev, ip->indirect_pntr);
     a = (uint*)bp->data;
     for(j = 0; j < NINDIRECT; j++){
       if(a[j])
         bfree(ip->dev, a[j]);
     }
     brelse(bp);
-    bfree(ip->dev, ip->addrs[NDIRECT]);
-    ip->addrs[NDIRECT] = 0;
+    bfree(ip->dev, ip->indirect_pntr);
+    ip->indirect_pntr = 0;
   }
 
   ip->size = 0;

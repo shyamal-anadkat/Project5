@@ -348,17 +348,17 @@ iappend(uint inum, void *xp, int n)
       }
       x = xint(din.addrs[fbn]);
     } else {
-      if(xint(din.addrs[NDIRECT]) == 0){
+      if(xint(din.indirect_pntr) == 0){
         // printf("allocate indirect block\n");
-        din.addrs[NDIRECT] = xint(freeblock++);
+        din.indirect_pntr = xint(freeblock++);
         usedblocks++;
       }
       // printf("read indirect block\n");
-      rsect(xint(din.addrs[NDIRECT]), (char*)indirect);
+      rsect(xint(din.indirect_pntr), (char*)indirect);
       if(indirect[fbn - NDIRECT] == 0){
         indirect[fbn - NDIRECT] = xint(freeblock++);
         usedblocks++;
-        wsect(xint(din.addrs[NDIRECT]), (char*)indirect);
+        wsect(xint(din.indirect_pntr), (char*)indirect);
       }
       x = xint(indirect[fbn-NDIRECT]);
     }
