@@ -332,7 +332,7 @@ iappend(uint inum, void *xp, int n)
   uint fbn, off, n1;
   struct dinode din;
   char buf[512];
-  uint indirect[NINDIRECT];
+  uint indirect[NINDIRECT*2]; //make that twice ? p5
   uint x;
 
   rinode(inum, &din);
@@ -366,6 +366,17 @@ iappend(uint inum, void *xp, int n)
     rsect(x, buf);
     bcopy(p, buf + off - (fbn * 512), n1);
     wsect(x, buf);
+
+    //CHECK SUM : p5
+    if(fbn < NDIRECT) {
+      din.checksums[fbn] = adler32((void *) buf, BSIZE);
+
+    } else {
+      fbn -= NDIRECT;
+      indirect[fbn + NINDIRECT] = adler32((void *) buf, BSIZE);
+      wsect(xint(din.indirect_pntr), (char*)indirect);
+    }
+
     n -= n1;
     off += n1;
     p += n1;

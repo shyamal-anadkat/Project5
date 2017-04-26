@@ -26,7 +26,7 @@ struct inode {
   uint size;
   uint addrs[NDIRECT];
   uint checksums[NDIRECT];
-  uint indirect_pntr; 
+  uint indirect_pntr;
 };
 
 #define I_BUSY 0x1
