@@ -367,14 +367,14 @@ iappend(uint inum, void *xp, int n)
     bcopy(p, buf + off - (fbn * 512), n1);
     wsect(x, buf);
 
-    // p5 Part 1 support
-    if (fbn < NDIRECT) {
-      din.checksums[fbn] = adler32((void*)buf, BSIZE);
-    }
-    else {
+    //CHECK SUM : p5
+    if(fbn < NDIRECT) {
+      din.checksums[fbn] = adler32((void *) buf, BSIZE);
+
+    } else {
       fbn -= NDIRECT;
-      indirect[fbn + NINDIRECT] = adler32((void*) buf, BSIZE);
-      wsect(xint(din.addrs[NDIRECT]), (char*)indirect);
+      indirect[fbn + NINDIRECT] = adler32((void *) buf, BSIZE);
+      wsect(xint(din.indirect_pntr), (char*)indirect);
     }
 
     n -= n1;
