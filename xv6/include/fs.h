@@ -55,7 +55,6 @@ struct dirent {
 };
 
 // Adler-32 algorithm to compute checksums 
-
 #define ADLER32_BASE 65521U
 
 static inline uint adler32(void* data, uint len)
