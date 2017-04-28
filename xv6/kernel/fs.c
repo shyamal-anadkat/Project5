@@ -402,6 +402,18 @@ stati(struct inode *ip, struct stat *st)
   st->type = ip->type;
   st->nlink = ip->nlink;
   st->size = ip->size;
+
+
+  //if file is empty, checksum field set to 0
+  if(ip->size == 0) {
+      st->checksum = 0; 
+  }
+  //fill checksum with XOR of all 
+  //Adler-32 checksums of all blocks in file 
+  int i;
+  for(i = 0; i < NDIRECT; i++) {
+      st->checksum = st->checksum ^ (ip->checksums[i]);
+  }
 }
 
 // Read data from inode.
