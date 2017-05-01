@@ -103,6 +103,10 @@ sys_fstat(void)
   
   if(argfd(0, 0, &f) < 0 || argptr(1, (void*)&st, sizeof(*st)) < 0)
     return -1;
+
+  // loop here to go through all blocks
+  // XOR of the Adler-32 checksums of all the blocks in the file
+  
   return filestat(f, st);
 }
 

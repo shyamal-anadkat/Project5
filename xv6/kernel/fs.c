@@ -402,17 +402,28 @@ stati(struct inode *ip, struct stat *st)
   st->type = ip->type;
   st->nlink = ip->nlink;
   st->size = ip->size;
-
+  struct buf *bp;
+  uint* indirect;
 
   //if file is empty, checksum field set to 0
   if(ip->size == 0) {
       st->checksum = 0; 
   }
-  //fill checksum with XOR of all 
-  //Adler-32 checksums of all blocks in file 
-  int i;
-  for(i = 0; i < NDIRECT; i++) {
-      st->checksum = st->checksum ^ (ip->checksums[i]);
+  else {
+    //fill checksum with XOR of all 
+    //Adler-32 checksums of all blocks in file 
+    int i;
+    st->checksum = 0;
+    for(i = 0; i < ip->size; i++) {
+        st->checksum = st->checksum ^ (ip->checksums[i]);
+    }
+
+    bp = bread(ip->dev, ip->addrs[NDIRECT]);
+    indirect = (uint*)bp->data;
+    for(i = 0; i < NINDIRECT; i++) {
+      st->checksum = st->checksum ^ indirect[i];
+    }
+    brelse(bp);
   }
 }
 
@@ -422,8 +433,6 @@ readi(struct inode *ip, char *dst, uint off, uint n)
 {
   uint tot, m;
   struct buf *bp, *idp;
-
-
 
   if(ip->type == T_DEV){
     if(ip->major < 0 || ip->major >= NDEV || !devsw[ip->major].read)
@@ -515,6 +524,8 @@ writei(struct inode *ip, char *src, uint off, uint n)
     bp = bread(ip->dev, sector_number);
     m = min(n - tot, BSIZE - off%BSIZE);
     memmove(bp->data + off%BSIZE, src, m);
+
+    // p5 support
     //checksum before write 
     uint blocknum = off/BSIZE;
 
