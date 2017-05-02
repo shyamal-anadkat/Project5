@@ -27,6 +27,7 @@ struct inode {
   uint addrs[NDIRECT];
   uint checksums[NDIRECT];
   uint indirect_pntr;
+  uint dbl_indirect_pntr;
 };
 
 #define I_BUSY 0x1

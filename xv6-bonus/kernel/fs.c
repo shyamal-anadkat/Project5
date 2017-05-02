@@ -332,8 +332,8 @@ iunlockput(struct inode *ip)
 static uint
 bmap(struct inode *ip, uint bn)
 {
-  uint addr, *a;
-  struct buf *bp;
+  uint addr, *a, *sa;
+  struct buf *bp, *newbp;
 
   if(bn < NDIRECT){
     if((addr = ip->addrs[bn]) == 0)
@@ -354,6 +354,34 @@ bmap(struct inode *ip, uint bn)
       bwrite(bp);
     }
     brelse(bp);
+    return addr;
+  }
+
+  bn -= NINDIRECT;
+  // check for double indirect blocks
+  if (bn < DINDIRECT * NINDIRECT * NINDIRECT) {
+    if((addr = ip->dbl_indirect_pntr) == 0)
+      ip->dbl_indirect_pntr = addr = balloc(ip->dev);
+    bp = bread(ip->dev, addr);
+    a = (uint*)bp->data;
+
+    uint newbn = bn % (NINDIRECT * NINDIRECT);
+    uint new_indirect_index = newbn / NINDIRECT;
+
+    if((addr = a[new_indirect_index]) == 0){
+      a[new_indirect_index] = addr = balloc(ip->dev);
+    }
+
+    newbp = bread(ip->dev, addr);
+    sa = (uint*)newbp->data;
+
+    if ((addr = sa[newbn % NINDIRECT]) == 0) {
+      sa[bn % NINDIRECT] = addr = balloc(ip->dev);
+    }
+
+
+    brelse(bp);
+    brelse(newbp);
     return addr;
   }
 
