@@ -22,11 +22,11 @@ main(int argc, char *argv[])
    int fd, r;
    char buf[BSIZE];
 
-   fd = open("out", O_RDONLY);
-   //assert(fd >= 0);
+   fd = open("out", O_RDONLY | O_CREATE);
+   assert(fd >= 0);
 
    r = read(fd, buf, BSIZE);
-   assert(r == -1);
+   assert(r == 0);
 
    printf(1, "TEST PASSED\n");
 

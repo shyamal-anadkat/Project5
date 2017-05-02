@@ -20,7 +20,7 @@ main(int argc, char *argv[])
 {
    ppid = getpid();
    int fd;
-   int size = 10;
+   int size = 1000;
    int n = (MAXFILE * BSIZE) / size;
    int i;
    char buf[size];

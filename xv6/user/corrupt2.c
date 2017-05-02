@@ -22,8 +22,8 @@ main(int argc, char *argv[])
    char buf[BSIZE];
    int i, j;
 
-   fd = open("out", O_RDONLY);
-   //assert(fd >= 0);
+   fd = open("out", O_RDONLY | O_CREATE);
+   assert(fd >= 0);
 
    for (i = 0; i < NDIRECT; i++) {
       r = read(fd, buf, BSIZE);
