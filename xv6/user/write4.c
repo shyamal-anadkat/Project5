@@ -1,5 +1,3 @@
-
-
 #include "types.h"
 #include "stat.h"
 #include "user.h"
@@ -23,7 +21,7 @@ main(int argc, char *argv[])
    int fd;
    int size = 1000;
    int n = (MAXFILE * BSIZE) / size;
-   int i;
+   int i, j;
    char buf[size];
    int r;
 
@@ -36,25 +34,28 @@ main(int argc, char *argv[])
 
    memset(buf, 0, size);
 
-   char checksum = 0;
-
    printf(1, "writing file\n");
    for (i = 0; i < n; i++) {
-      strcpy(buf, "BLOCK ");
-      buf[6] = (char)('A' + i);
-      checksum ^= buf[6];
+      buf[0] = (char)('A' + i);
       r = write(fd, buf, size);
       assert(r == size);
    }
 
-
-   struct stat st;
-   fstat(fd, &st);
-   printf(1,"correct checksum: %x \n", checksum);
-   assert(st.checksum == checksum);
-
+   printf(1, "reopening read only\n");
    r = close(fd);
    assert(r == 0);
+   fd = open("out", O_RDONLY);
+   //assert(fd >= 0);
+
+   printf(1, "reading file\n");
+   for (i = 0; i < n; i++) {
+      r = read(fd, buf, size);
+      assert(r == size);
+      assert(buf[0] == (char)('A' + i));
+      for (j = 1; j < size; j++) {
+         assert(buf[j] == 0);
+      }
+   }
 
    printf(1, "TEST PASSED\n");
 
