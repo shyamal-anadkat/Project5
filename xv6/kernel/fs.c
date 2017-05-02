@@ -414,14 +414,14 @@ stati(struct inode *ip, struct stat *st)
     //Adler-32 checksums of all blocks in file 
     int i;
     st->checksum = 0;
-    for(i = 0; i < ip->size; i++) {
+    for(i = 0; i < NDIRECT; i++) {
         st->checksum = st->checksum ^ (ip->checksums[i]);
     }
 
-    bp = bread(ip->dev, ip->addrs[NDIRECT]);
+    bp = bread(ip->dev, ip->indirect_pntr);
     indirect = (uint*)bp->data;
     for(i = 0; i < NINDIRECT; i++) {
-      st->checksum = st->checksum ^ indirect[i];
+      st->checksum = st->checksum ^ indirect[i + NINDIRECT];
     }
     brelse(bp);
   }
