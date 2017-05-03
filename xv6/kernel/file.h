@@ -10,15 +10,12 @@ struct file {
   uint off;
 };
 
-
 // in-core file system types
-
 struct inode {
   uint dev;           // Device number
   uint inum;          // Inode number
   int ref;            // Reference count
   int flags;          // I_BUSY, I_VALID
-
   short type;         // copy of disk inode
   short major;
   short minor;
@@ -32,9 +29,7 @@ struct inode {
 #define I_BUSY 0x1
 #define I_VALID 0x2
 
-
 // device implementations
-
 struct devsw {
   int (*read)(struct inode*, char*, int);
   int (*write)(struct inode*, char*, int);
