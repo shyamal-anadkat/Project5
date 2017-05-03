@@ -22,13 +22,7 @@ USER_PROGS := \
 	write1\
 	write2\
 	write3\
-	write4\
-	corrupt1\
-	corrupt2\
-	corrupt3\
-	checksum1\
-	checksum2\
-	checksum3
+	write4
 
 USER_PROGS := $(addprefix user/, $(USER_PROGS))
 

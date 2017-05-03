@@ -38,19 +38,21 @@ main(int argc, char *argv[])
    memset(buf, 0, size);
    strcpy(buf, "BLOCK ");
 
-   unsigned char checksum = 0;
+   uint checksum = 0;
 
    printf(1, "writing file\n");
    for (i = 0; i < n; i++) {
       buf[6] = (char)('A' + i);
-      checksum ^= buf[6];
+   
+      //checksum ^= buf[6];
+      checksum ^= adler32(&buf[6], BSIZE);
       r = write(fd, buf, size);
       assert(r == size);
    }
 
    struct stat st;
    fstat(fd, &st);
-   printf(1, "stat checksum: %d actual: %d\n", (int)st.checksum, (int)checksum);
+   printf(1, "stat checksum: %x actual: %x\n", (uint)st.checksum, (uint)checksum);
    assert(st.checksum == checksum);
 
    r = close(fd);

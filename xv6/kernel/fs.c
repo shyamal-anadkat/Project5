@@ -377,6 +377,13 @@ itrunc(struct inode *ip)
     }
   }
   
+  for(i = 0; i < NDIRECT; i++){
+    if(ip->checksums[i]){
+      bfree(ip->dev, ip->checksums[i]);
+      ip->checksums[i] = 0;
+    }
+  }
+
   if(ip->indirect_pntr){
     bp = bread(ip->dev, ip->indirect_pntr);
     a = (uint*)bp->data;
@@ -415,12 +422,14 @@ stati(struct inode *ip, struct stat *st)
     int i;
     st->checksum = 0;
     for(i = 0; i < NDIRECT; i++) {
+      //cprintf("Checksum Direct: %x\n", st->checksum);
         st->checksum = st->checksum ^ (ip->checksums[i]);
     }
 
     bp = bread(ip->dev, ip->indirect_pntr);
     indirect = (uint*)bp->data;
     for(i = 0; i < NINDIRECT; i++) {
+      //cprintf("Checksum Indirect: %x\n", st->checksum);
       st->checksum = st->checksum ^ indirect[i + NINDIRECT];
     }
     brelse(bp);
@@ -480,8 +489,7 @@ readi(struct inode *ip, char *dst, uint off, uint n)
     	blocknum -= NDIRECT;
 
 	    if(indirect_data[blocknum + NINDIRECT] != checksum) {
-	    	cprintf("Error: checksum mismatch, block %d\n",		
-	                        blocknum + NDIRECT);
+	    	cprintf("Error: checksum mismatch, block %d\n",	blocknum + NDIRECT);
 	    	brelse(bp);
 	    	brelse(idp);
 	    	return -1;
